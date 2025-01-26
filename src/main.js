@@ -1,6 +1,6 @@
 import { createFileInput, handleFileUpload } from './components/fileHandler.js';
 import { addMessage, addTypingIndicator } from './components/messageUI.js';
-import { simulateAIResponse } from './components/apiHandler.js';
+import { simulateAIResponse, createAbortController } from './components/apiHandler.js';
 import { loadChats, saveCurrentChat, loadChat } from './components/chatManager.js';
 import { setupSidebarHandlers, handleNewChat } from './components/sidebarManager.js';
 
@@ -14,11 +14,13 @@ const chatContainer = document.getElementById('chatContainer');
 const modelSelect = document.getElementById('modelSelect');
 const newChatBtn = document.getElementById('newChatBtn');
 const chatHistory = document.getElementById('chatHistory');
+const cancelButton = document.getElementById('cancelButton');
 
 // Initialize state
 let currentChatId = Date.now();
 let chats = JSON.parse(localStorage.getItem('chats') || '[]');
 let pendingFileContents = null;
+let currentController = null;
 
 // Initialize file handling
 const fileInput = createFileInput();
@@ -26,6 +28,14 @@ const uploadButton = document.getElementById('uploadButton');
 
 // Setup event listeners
 uploadButton.addEventListener('click', () => fileInput.click());
+
+cancelButton.addEventListener('click', () => {
+  if (currentController) {
+    currentController.abort();
+    currentController = null;
+    cancelButton.classList.add('hidden');
+  }
+});
 
 fileInput.addEventListener('change', async () => {
   const result = await handleFileUpload(Array.from(fileInput.files), 
@@ -65,9 +75,17 @@ messageForm.addEventListener('submit', async (e) => {
   messageInput.style.height = 'auto';
 
   const typingIndicator = addTypingIndicator(messagesContainer);
+  currentController = createAbortController();
+  cancelButton.classList.remove('hidden');
 
   try {
-    const response = await simulateAIResponse(hiddenContent || displayMessage, messagesContainer, modelSelect);
+    const response = await simulateAIResponse(
+      hiddenContent || displayMessage, 
+      messagesContainer, 
+      modelSelect, 
+      currentController.signal
+    );
+    
     typingIndicator.remove();
     addMessage(
       response.content, 
@@ -79,7 +97,14 @@ messageForm.addEventListener('submit', async (e) => {
     saveCurrentChat(messagesContainer, currentChatId, chats, modelSelect);
   } catch (error) {
     typingIndicator.remove();
-    addMessage('Sorry, there was an error processing your request.', 'error', null, null, messagesContainer);
+    if (error.name === 'AbortError') {
+      addMessage('Generation cancelled.', 'system', null, null, messagesContainer);
+    } else {
+      addMessage('Sorry, there was an error processing your request.', 'error', null, null, messagesContainer);
+    }
+  } finally {
+    currentController = null;
+    cancelButton.classList.add('hidden');
   }
 });
 
@@ -93,6 +118,12 @@ setupSidebarHandlers(sidebar, sidebarToggle, chatContainer);
 
 // Setup new chat button
 newChatBtn.addEventListener('click', () => {
+  if (currentController) {
+    currentController.abort();
+    currentController = null;
+    cancelButton.classList.add('hidden');
+  }
+  
   currentChatId = handleNewChat(
     () => saveCurrentChat(messagesContainer, currentChatId, chats, modelSelect),
     currentChatId,

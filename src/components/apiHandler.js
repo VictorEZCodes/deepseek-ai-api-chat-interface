@@ -1,9 +1,9 @@
-export async function simulateAIResponse(message, messagesContainer, modelSelect) {
+export async function simulateAIResponse(message, messagesContainer, modelSelect, signal) {
   try {
     const allMessages = getAllMessages(messagesContainer, message);
     const processedMessages = processMessages(allMessages);
     const apiMessages = prepareApiMessages(processedMessages);
-    return await sendRequest(apiMessages, modelSelect.value);
+    return await sendRequest(apiMessages, modelSelect.value, signal);
   } catch (error) {
     console.error('Error:', error);
     throw error;
@@ -61,7 +61,7 @@ function prepareApiMessages(messages) {
   ];
 }
 
-async function sendRequest(messages, modelValue) {
+async function sendRequest(messages, modelValue, signal) {
   const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -73,7 +73,8 @@ async function sendRequest(messages, modelValue) {
       messages: messages,
       ...(modelValue === 'deepseek-chat' && { temperature: 1.3 }),
       max_tokens: 4000
-    })
+    }),
+    signal
   });
 
   if (!response.ok) {
@@ -97,4 +98,8 @@ async function sendRequest(messages, modelValue) {
   return {
     content: data.choices[0].message.content
   };
+}
+
+export function createAbortController() {
+  return new AbortController();
 }

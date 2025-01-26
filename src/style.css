@@ -165,7 +165,6 @@
   @apply min-h-[2.5rem] max-h-32 resize-none;
 }
 
-/* Add these at the end of your CSS file */
 .file-upload {
   @apply hidden;
 }
