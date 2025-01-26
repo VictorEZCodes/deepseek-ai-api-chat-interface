@@ -1,0 +1,187 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#sidebar {
+  width: 16rem;
+  z-index: 40;
+  transform: translateX(0);
+  transition: transform 0.3s ease-in-out;
+}
+
+#sidebar.w-0 {
+  transform: translateX(-100%);
+}
+
+#chatContainer {
+  transition: margin-left 0.3s ease-in-out;
+  margin-left: 16rem;
+  width: calc(100% - 16rem);
+}
+
+#chatContainer.sidebar-closed {
+  margin-left: 0;
+  width: 100%;
+}
+
+#messagesContainer {
+  @apply px-4 md:px-8 max-w-3xl mx-auto w-full;
+}
+
+.message {
+  @apply rounded-lg mb-4 opacity-0;
+  max-width: min(90%, 600px);
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+  padding: 0.75rem 1rem;
+  width: fit-content;
+}
+
+.message.animate-fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.user-message {
+  @apply bg-blue-500/10 dark:bg-blue-500/20 ml-auto;
+  margin-right: 1.5rem;
+  border-radius: 12px;
+  border-bottom-right-radius: 4px;
+}
+
+.ai-message {
+  @apply bg-zinc-100 dark:bg-zinc-800/50 mr-auto;
+  margin-left: 1.5rem;
+  border-radius: 12px;
+  border-bottom-left-radius: 4px;
+}
+
+.error-message {
+  @apply bg-red-500/10 dark:bg-red-500/20 text-red-600 dark:text-red-400 mx-auto;
+}
+
+.message-content {
+  @apply leading-relaxed whitespace-pre-wrap;
+}
+
+.message-content strong,
+.message-content b {
+  @apply font-semibold;
+}
+
+.ai-message .message-content {
+  @apply text-zinc-700 dark:text-zinc-300;
+}
+
+.ai-message .message-content strong,
+.ai-message .message-content b {
+  @apply text-zinc-900 dark:text-zinc-100;
+}
+
+.user-message .message-content {
+  @apply text-zinc-800 dark:text-zinc-200;
+}
+
+.user-message .message-content strong,
+.user-message .message-content b {
+  @apply text-zinc-900 dark:text-zinc-100;
+}
+
+.reasoning-content {
+  @apply mb-4 p-4 rounded-lg bg-blue-500/5 dark:bg-blue-500/10;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.reasoning-header {
+  @apply flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 mb-2 font-medium;
+}
+
+.reasoning-content pre {
+  @apply text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap;
+  font-family: inherit;
+}
+
+.typing-indicator {
+  @apply bg-transparent p-0 mr-auto !important;
+  max-width: max-content !important;
+  margin-left: 1.5rem !important;
+}
+
+.typing-indicator .dots {
+  @apply flex gap-1.5 px-3 py-2 bg-zinc-100 dark:bg-zinc-800/50 rounded-2xl items-center;
+}
+
+.typing-indicator .dots span {
+  @apply w-2.5 h-2.5 bg-zinc-400 dark:bg-zinc-500 rounded-full opacity-60 inline-block;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator .dots span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator .dots span:nth-child(2) { animation-delay: -0.16s; }
+.typing-indicator .dots span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% { 
+    transform: translateY(0);
+  }
+  40% { 
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  #chatContainer {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .message {
+    max-width: 88%;
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  
+  .typing-indicator {
+    margin-left: 1rem !important;
+  }
+
+  #messageForm {
+    @apply p-2;
+  }
+}
+
+#messageInput {
+  @apply min-h-[2.5rem] max-h-32 resize-none;
+}
+
+/* Add these at the end of your CSS file */
+.file-upload {
+  @apply hidden;
+}
+
+.file-message {
+  @apply bg-blue-50 dark:bg-blue-900/20;
+}
+
+.file-message .message-content {
+  @apply font-mono text-sm;
+}
+
+#uploadButton:hover svg {
+  @apply text-blue-500 dark:text-blue-400;
+}
+
+#uploadButton:active {
+  @apply bg-zinc-200 dark:bg-zinc-600;
+}

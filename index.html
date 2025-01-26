@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Chat Interface</title>
+    <link rel="stylesheet" href="/src/style.css">
+  </head>
+  <body class="bg-zinc-50 dark:bg-zinc-900">
+    <div id="app" class="flex h-screen relative overflow-hidden">
+      <button id="sidebarToggle" class="fixed top-4 left-4 z-50 p-2 rounded-lg hover:bg-zinc-200 dark:hover:bg-zinc-700">
+        <svg class="w-6 h-6 text-zinc-600 dark:text-zinc-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+          <path d="M4 6h16M4 12h16M4 18h16" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <div id="sidebar" class="fixed top-0 left-0 h-full bg-zinc-100 dark:bg-zinc-800 transition-all duration-300">
+        <div class="p-4 pt-16">
+          <button id="newChatBtn" class="w-full mb-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M12 4v16m-8-8h16" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            New Chat
+          </button>
+          <div class="mb-4">
+            <label class="block text-sm font-medium mb-2 text-zinc-700 dark:text-zinc-300">Model</label>
+            <select id="modelSelect" class="w-full p-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800">
+              <option value="deepseek-chat">DeepSeek Chat</option>
+              <option value="deepseek-reasoner">DeepSeek Reasoner</option>
+            </select>
+          </div>
+          <div id="chatHistory" class="space-y-2 mt-4 max-h-[calc(100vh-180px)] overflow-y-auto">
+            <!-- Chat history items will be added here -->
+          </div>
+        </div>
+      </div>
+      <div id="chatContainer" class="flex-1 flex flex-col h-full overflow-hidden pt-16">
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 space-y-4">
+          <!-- Messages will be added here -->
+        </div>
+        <div class="border-t border-zinc-200 dark:border-zinc-700 p-2 sm:p-4">
+          <form id="messageForm" class="flex gap-2 max-w-[800px] mx-auto">
+            <button
+              type="button"
+              id="uploadButton"
+              class="p-2 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 text-zinc-500 dark:text-zinc-400"
+              title="Upload files"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M12 4v16m0-16L8 8m4-4l4 4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <input
+              type="text"
+              id="messageInput"
+              placeholder="Type your message..."
+              class="flex-1 p-2 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span class="hidden sm:inline">Send</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
