@@ -2,7 +2,7 @@ export async function simulateAIResponse(message, messagesContainer, modelSelect
   try {
     const allMessages = getAllMessages(messagesContainer, message);
     const processedMessages = processMessages(allMessages);
-    const apiMessages = prepareApiMessages(processedMessages);
+    const apiMessages = prepareApiMessages(processedMessages, modelSelect.value);
     return await sendRequest(apiMessages, modelSelect.value, signal);
   } catch (error) {
     console.error('Error:', error);
@@ -51,13 +51,27 @@ function processMessages(messages) {
   return processedMessages;
 }
 
-function prepareApiMessages(messages) {
+function prepareApiMessages(messages, modelValue) {
+  const systemMessage = modelValue === 'deepseek-reasoner' 
+    ? 'You are a helpful assistant that analyzes files and provides detailed reasoning about them. When files are shared, examine their content carefully and explain your thought process.'
+    : 'You are a helpful assistant.';
+
   return [
-    { role: 'system', content: 'You are a helpful assistant.' },
-    ...messages.map(msg => ({
-      role: msg.type === 'user' ? 'user' : 'assistant',
-      content: msg.content
-    }))
+    { role: 'system', content: systemMessage },
+    ...messages.map(msg => {
+      let content = msg.content;
+      
+      if (content.includes('I\'m sharing these files with you')) {
+        content = content
+          .replace(/\n---\n/g, '\n\n')
+          .replace(/File: (.+)\n\nContent:\n/g, '=== File: $1 ===\n');
+      }
+
+      return {
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: content
+      };
+    })
   ];
 }
 
@@ -71,8 +85,15 @@ async function sendRequest(messages, modelValue, signal) {
     body: JSON.stringify({
       model: modelValue,
       messages: messages,
-      ...(modelValue === 'deepseek-chat' && { temperature: 1.3 }),
-      max_tokens: 4000
+      ...(modelValue === 'deepseek-chat' && { 
+        temperature: 1.3,
+        max_tokens: 2000
+      }),
+      ...(modelValue === 'deepseek-reasoner' && { 
+        temperature: 0.7,
+        show_reasoning_process: true,
+        max_tokens: 4000
+      })
     }),
     signal
   });
@@ -89,9 +110,12 @@ async function sendRequest(messages, modelValue, signal) {
   }
 
   if (modelValue === 'deepseek-reasoner') {
+    const reasoningContent = data.choices[0].message.reasoning_process || 
+                           data.choices[0].message.reasoning_content || 
+                           'No reasoning process provided';
     return {
       content: data.choices[0].message.content,
-      reasoningContent: data.choices[0].message.reasoning_content
+      reasoningContent
     };
   }
   
